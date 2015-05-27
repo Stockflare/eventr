@@ -14,6 +14,13 @@ module Eventr
       def track(id, name, properties = {})
       end
 
+      def control
+        @control ||= library
+      end
+
+      def library
+      end
+
     end
   end
 end

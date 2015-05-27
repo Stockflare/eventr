@@ -15,8 +15,15 @@ module Eventr
     # Ensure that the gem is included within your
     # Gemfile or Gemspec.
     #
-    # @note https://github.com/mixpanel/mixpanel-ruby
+    # @see https://github.com/mixpanel/mixpanel-ruby
     autoload :Mixpanel
+
+    # The 'kmts' gem must be included before this class will
+    # work properly. This receiver will send events and identities
+    # to Kiss Metrics.
+    #
+    # @see https://github.com/kissmetrics/kmts
+    autoload :Kiss
 
   end
 end

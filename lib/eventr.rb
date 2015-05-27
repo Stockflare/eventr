@@ -23,7 +23,9 @@ module Eventr
   # Delegate an action to all registered receivers
   #
   def self.delegate_to_receivers(action, *args)
-    self.receivers.each { |receiver| receiver.send(action, *args) }
+    self.receivers.each do |receiver|
+      receiver.send(action, *args) if receiver.respond_to? action
+    end
   end
 
   # Helper to configure the Search module.

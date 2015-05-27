@@ -4,15 +4,15 @@ if Object.const_defined? :Mixpanel
       class Mixpanel < Base
 
         def identity(*args)
-          tracker.people.set(*args)
+          control.people.set(*args)
         end
 
         def track(*args)
-          tracker.track(*args)
+          control.track(*args)
         end
 
-        def tracker
-          @tracker ||= Mixpanel::Tracker.new(token)
+        def library
+          Mixpanel::Tracker.new(token)
         end
 
       end

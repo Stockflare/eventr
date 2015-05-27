@@ -11,15 +11,15 @@ if Object.const_defined? :KMTS
         end
 
         def identity(*args)
-          kmts.set(*args)
+          control.set(*args)
         end
 
         def track(*args)
-          kmts.record(*args)
+          control.record(*args)
         end
 
-        def kmts
-          @kmts ||= KMTS.init(token, options)
+        def library
+          KMTS.init(token, options)
         end
 
       end
