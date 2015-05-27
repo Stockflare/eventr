@@ -1,6 +1,6 @@
-module Eventr
-  module Receivers
-    if Object.const_defined? :Mixpanel
+if Object.const_defined? :Mixpanel
+  module Eventr
+    module Receivers
       class Mixpanel < Base
 
         def identity(*args)
@@ -16,8 +16,8 @@ module Eventr
         end
 
       end
-    else
-      raise 'could not detect mixpanel library'
     end
   end
+else
+  raise 'could not detect mixpanel library'
 end

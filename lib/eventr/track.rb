@@ -8,8 +8,9 @@ module Eventr
   # the event may receive, returning a hash to be sent to the receivers.
   #
   # This module can be included within any class, the only requirement is that
-  # the class itself, supports an #id method, used to uniquely identify the
-  # instance of the class.
+  # the class itself, supports an #id method, or an ident has been set (as in
+  # the example below). This is used to uniquely identify the instance of the class.
+  # This *should* not be an issue though for database models.
   #
   # @example Simple class, instance tracking
   #   Simple class that enables you to track the event "Game Played" using
@@ -36,9 +37,13 @@ module Eventr
   #
   #     has_many :posts, after_add: :created_post!
   #
-  #     track :created_post, -> (post) { { Title: post.title } }
+  #     track :created_post do |post|
+  #       { Title: post.title }
+  #     end
   #
-  #     track :changed_email, -> (email) { { "Old Email" => email } }
+  #     track :changed_email do |email|
+  #       { "Old Email" => email }
+  #     end
   #
   #     def update_email(new_email)
   #       changed_email! email
@@ -50,15 +55,17 @@ module Eventr
 
     extend ActiveSupport::Concern
 
+    include Ident
+
     included do
 
-      def self.track(key, call = nil)
-        call = case call
-        when Proc then call
-        when Symbol then
-          sym = call.to_sym
-          -> (a) { send(sym, a) }
-        else -> (a) { a }
+      def self.track(key, sym = nil, &block)
+        call = if sym
+          -> (a) { send(sym.to_sym, a) }
+        elsif block
+          block
+        else
+          -> (a) { a }
         end
         define_method(:"#{eventr_methodize_key(key)}!") do |obj = {}|
           eventr_send_event(key.to_s.titleize, instance_exec(obj, &call))
@@ -74,7 +81,7 @@ module Eventr
     private
 
     def eventr_send_event(name, properties)
-      Eventr.delegate_to_receivers(:track, id, name, properties)
+      Eventr.delegate_to_receivers(:track, ident_id, name, properties)
     end
 
   end

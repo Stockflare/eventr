@@ -8,11 +8,15 @@ module Eventr
 
     track :"Threw_A_Ball", :ball_sizer
 
-    track :sent_message, -> (contents) { { Message: contents } }
+    track :sent_message do |contents|
+      { Message: contents }
+    end
 
     # has_many :orders, after_add: :created_order!
 
-    # track :created_order, -> (order) { { Items: order.items.count } }
+    # track :created_order do |order|
+    #   { Items: order.items.count }
+    # end
 
     def id
       1

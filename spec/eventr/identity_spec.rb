@@ -6,7 +6,9 @@ module Eventr
 
     property :$email, :mapped_email
 
-    property :Favorite_Color, Proc.new { a_color.capitalize }
+    property :Favorite_Color do
+      a_color.capitalize
+    end
 
     property :"Favorite Animal"
 

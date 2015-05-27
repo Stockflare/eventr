@@ -13,8 +13,9 @@ module Eventr
   # resulting identity.
   #
   # This module can be included within any class, the only requirement is that
-  # the class itself, supports an #id method, used to uniquely identify the
-  # instance of the class. This *should* not be an issue though for database models.
+  # the class itself, supports an #id method, or an ident has been set (as in
+  # the example below). This is used to uniquely identify the instance of the class.
+  # This *should* not be an issue though for database models.
   #
   # @example Defining properties onto a class
   #   This example class includes the Identity module into an ActiveRecord model.
@@ -39,11 +40,15 @@ module Eventr
   #
   #     # execute a proc within the context of the class, capitalizing the color
   #     # model attribute.
-  #     property :"Favorite Color", Proc.new { color.capitalize }
+  #     property :"Favorite Color" do
+  #       color.capitalize
+  #     end
   #
   #     has_many :toys
   #
-  #     property :Number_Of_Toys, -> (*a) { toys.count }
+  #     property :Number_Of_Toys do
+  #       toys.count
+  #     end
   #
   #     def encrypted_email
   #       Some::Decryption::Class.new(email)
@@ -54,18 +59,27 @@ module Eventr
 
     extend ActiveSupport::Concern
 
+    include Ident
+
     included do
 
       self.cattr_accessor :eventr_property_fields
       self.eventr_property_fields = {}
 
-      def self.property(key, call = nil)
-        eventr_property_fields[key] = case call
-        when Proc then call
-        when nil then property(key, eventr_methodize_key(key))
-        when Symbol then Proc.new { send(call) }
-        else Proc.new { send(call.to_sym) }
+      def self.property(key, sym = nil, &call)
+        eventr_property_fields[key] = if sym
+          Proc.new { send(sym) }
+        elsif call
+          call
+        else
+          property(key, eventr_methodize_key(key))
         end
+        # eventr_property_fields[key] = case call
+        # when Proc then call
+        # when nil then property(key, eventr_methodize_key(key))
+        # when Symbol then Proc.new { send(call) }
+        # else Proc.new { send(call.to_sym) }
+        # end
       end
 
       def self.eventr_methodize_key(key)
@@ -89,7 +103,7 @@ module Eventr
     # Sends the identity hash to the receivers to be processed.
     #
     def send_identity
-      Eventr.delegate_to_receivers(:identity, id, to_identity)
+      Eventr.delegate_to_receivers(:identity, ident_id, to_identity)
     end
 
     alias_method :update_identity, :send_identity
