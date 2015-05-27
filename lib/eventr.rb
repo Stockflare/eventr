@@ -13,6 +13,7 @@ module Eventr
   extend ActiveSupport::Autoload
 
   autoload :Identity
+  autoload :Track
   autoload :Receivers
 
   self.cattr_accessor :receivers

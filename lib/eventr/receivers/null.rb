@@ -1,10 +1,6 @@
 module Eventr
   module Receivers
-    class Null
-
-      def identity(id, properties)
-      end
-
+    class Null < Base
     end
   end
 end

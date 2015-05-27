@@ -8,11 +8,17 @@ module Eventr
       self.cattr_accessor :eventr_property_fields
       self.eventr_property_fields = {}
 
-      def self.property(key, call)
+      def self.property(key, call = nil)
         eventr_property_fields[key] = case call
         when Proc then call
+        when nil then property(key, eventr_methodize_key(key))
         when Symbol then Proc.new { send(call) }
+        else Proc.new { send(call.to_sym) }
         end
+      end
+
+      def self.eventr_methodize_key(key)
+        key.to_s.downcase.gsub(' ', '_').underscore.to_sym
       end
 
     end

@@ -8,6 +8,8 @@ module Eventr
 
     property :Favorite_Color, Proc.new { a_color.capitalize }
 
+    property :"Favorite Animal"
+
     def id
       1
     end
@@ -32,6 +34,10 @@ module Eventr
       "red"
     end
 
+    def favorite_animal
+      "elephant"
+    end
+
   end
 
   describe 'a properties class' do
@@ -43,6 +49,8 @@ module Eventr
     it { should respond_to(:to_identity) }
 
     it { should respond_to(:send_identity) }
+
+    it { should respond_to(:update_identity) }
 
     describe 'when #send_identity is called' do
 
@@ -60,7 +68,9 @@ module Eventr
 
       it { should be_a Hash }
 
-      specify { expect(subject.keys).to include '$first_name', '$last_name', '$email', '$phone', 'Favorite Color' }
+      specify { expect(subject.keys).to include '$first_name', '$last_name', '$email', '$phone', 'Favorite Color', 'Favorite Animal' }
+
+      specify { expect(subject.keys).to_not include 'ios_devices', :ios_devices, 'name', :name }
 
       describe 'value of $first_name' do
 
@@ -109,6 +119,16 @@ module Eventr
         it { should be_a String }
 
         it { should eq test.a_color.capitalize }
+
+      end
+
+      describe 'value of Favorite Animal' do
+
+        subject { test.to_identity['Favorite Animal'] }
+
+        it { should be_a String }
+
+        it { should eq test.favorite_animal }
 
       end
 
