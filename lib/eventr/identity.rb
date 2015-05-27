@@ -1,4 +1,55 @@
 module Eventr
+  # Include this module to provide identity support to any class, using
+  # a simple DSL to describe properties to be used and how they should be
+  # built from the instance.
+  #
+  # Properties can be defined in a number of different ways, see the example
+  # below for all the different possibilities, it should be pretty easy to
+  # see and understand how each type of property definition works.
+  #
+  # This module also automatically includes Special properties (aimed specifically
+  # at Mixpanel receivers). Simply define a relevant method, for example #first_name,
+  # to have the special property $first_name automatically included within the
+  # resulting identity.
+  #
+  # This module can be included within any class, the only requirement is that
+  # the class itself, supports an #id method, used to uniquely identify the
+  # instance of the class. This *should* not be an issue though for database models.
+  #
+  # @example Defining properties onto a class
+  #   This example class includes the Identity module into an ActiveRecord model.
+  #   Whilst the class does not have to be a "model", it makes it easier to
+  #   provide worked examples.
+  #
+  #   class User < ActiveRecord::Base
+  #
+  #     include Eventr::Identity
+  #
+  #     after_create :send_identity
+  #
+  #     after_update :update_identity
+  #
+  #     # name is a model attribute and will be AUTOMATICALLY included as $name
+  #
+  #     # use a symbol to represent the method to map this property to.
+  #     property $email, :encrypted_email
+  #
+  #     # implicitly map the name of the property to a model attribute
+  #     property :favorite_animal
+  #
+  #     # execute a proc within the context of the class, capitalizing the color
+  #     # model attribute.
+  #     property :"Favorite Color", Proc.new { color.capitalize }
+  #
+  #     has_many :toys
+  #
+  #     property :Number_Of_Toys, -> (*a) { toys.count }
+  #
+  #     def encrypted_email
+  #       Some::Decryption::Class.new(email)
+  #     end
+  #
+  #   end
   module Identity
 
     extend ActiveSupport::Concern
@@ -23,6 +74,10 @@ module Eventr
 
     end
 
+    # Use the properties defined on the class to build and return a hash
+    # containing all the special and custom properties.
+    #
+    # @return [Hash] a hash containing all detected properties.
     def to_identity
       identity = eventr_special_properties
       self.class.eventr_property_fields.each do |key, call|
@@ -31,6 +86,8 @@ module Eventr
       return identity
     end
 
+    # Sends the identity hash to the receivers to be processed.
+    #
     def send_identity
       Eventr.delegate_to_receivers(:identity, id, to_identity)
     end
